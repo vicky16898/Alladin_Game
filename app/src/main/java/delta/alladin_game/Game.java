@@ -7,6 +7,7 @@ import android.view.View;
 
 class Game extends View{
 
+    long FRAME_RATE = 1000/60;
     Aladdin aladdin;
     int sand_speed,sky_speed,dir_aladdin=1,speed_aladdin;
     Point point;
@@ -35,14 +36,14 @@ class Game extends View{
         sand.move(canvas,point.y/2 ,sand_speed);
         aladdin.move(canvas,speed_aladdin,dir_aladdin);
 
-        postInvalidateDelayed(20);
+        postInvalidateDelayed(FRAME_RATE);
     }
 
     public void changeDir() {
         if(dir_aladdin == 1)
-            speed_aladdin = point.x/75;
+            speed_aladdin = point.x/100;
         else
-            speed_aladdin = point.x/50;
+            speed_aladdin = point.x/80;
 
         dir_aladdin *= -1;
     }

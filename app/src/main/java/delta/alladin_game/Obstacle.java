@@ -8,16 +8,11 @@ import android.graphics.Point;
 import android.graphics.Rect;
 
 public class Obstacle {
-    Point point;
-    Context context;
-    int breadth , pos_x;
-    Paint whitePaint = new Paint(), blackPaint = new Paint();
-    Rect dst = new Rect();
+    private int breadth , pos_x;
+    private Paint whitePaint = new Paint(), blackPaint = new Paint();
+    private Rect dst = new Rect();
 
-    public void Obstacle(Context context, Point point,int height){
-        this.point = point;
-        this.context = context;
-
+    public void Obstacle(Context context,Point point, int height){
         this.breadth = point.x/12;
         pos_x = point.x + breadth/2;
 
