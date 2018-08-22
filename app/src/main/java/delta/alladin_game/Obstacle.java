@@ -1,6 +1,5 @@
 package delta.alladin_game;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,11 +7,15 @@ import android.graphics.Point;
 import android.graphics.Rect;
 
 public class Obstacle {
-    private int breadth , pos_x;
+    public boolean isPresent=false;
+    private int breadth;
+    public int pos_x;
+    public int height;
     private Paint whitePaint = new Paint(), blackPaint = new Paint();
-    private Rect dst = new Rect();
+    public Rect dst = new Rect();
 
-    public void Obstacle(Context context,Point point, int height){
+    Obstacle(Point point, int height){
+        this.height = height;
         this.breadth = point.x/12;
         pos_x = point.x + breadth/2;
 
@@ -23,7 +26,7 @@ public class Obstacle {
         blackPaint.setColor(Color.BLACK);
 
         dst.top = point.y - height;
-        dst.top = point.y;
+        dst.bottom = point.y;
     }
     void move(Canvas canvas,int speed){
         pos_x -= speed;

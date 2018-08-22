@@ -10,7 +10,7 @@ import android.graphics.Rect;
 class Aladdin {
     private int pos_y;
     private int length;
-    private Rect dst= new Rect();
+    public Rect dst= new Rect();
     private Rect src = new Rect();
     //Rect src;
     private Bitmap aladdin;
