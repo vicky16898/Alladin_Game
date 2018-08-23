@@ -12,6 +12,7 @@ import android.view.WindowManager;
 public class MainActivity extends AppCompatActivity {
     Game game;
     Point outSize;
+    int density;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -21,9 +22,10 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         outSize = new Point();
+        density =(int) getResources().getDisplayMetrics().density;
         getWindowManager().getDefaultDisplay().getSize(outSize);
 
-        game = new Game(this,outSize);
+        game = new Game(this,outSize,density);
         game.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {

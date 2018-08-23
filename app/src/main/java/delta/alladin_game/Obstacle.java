@@ -8,7 +8,7 @@ import android.graphics.Rect;
 
 public class Obstacle {
     public boolean isPresent=false;
-    private int breadth;
+    public int breadth;
     public int pos_x;
     public int height;
     private Paint whitePaint = new Paint(), blackPaint = new Paint();
@@ -28,7 +28,7 @@ public class Obstacle {
         dst.top = point.y - height;
         dst.bottom = point.y;
     }
-    void move(Canvas canvas,int speed){
+    void move(Canvas canvas, float speed){
         pos_x -= speed;
 
         dst.left = pos_x - breadth/2;

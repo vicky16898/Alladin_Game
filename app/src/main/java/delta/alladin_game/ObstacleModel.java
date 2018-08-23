@@ -38,19 +38,19 @@ public class ObstacleModel {
         return 0;
     }
 
-    void move(Canvas canvas, int speed) {
+    void move(Canvas canvas, float speed) {
         if (dist == 0) {
             lastObstacle = addObstacle();
             dist = random.nextInt(point.x / 4) + point.x / 4;
-        } else {
-            for (int i = 0; i < 4; i++) {
-                if (obstacles[i].isPresent) {
-                    obstacles[i].move(canvas, speed);
-                    if (point.x - obstacles[lastObstacle].pos_x > dist)
-                        dist = 0;
-                    if (obstacles[i].pos_x < 0)
+        }
+        for (int i = 0; i < 4; i++) {
+            if (obstacles[i].isPresent) {
+                obstacles[i].move(canvas, speed);
+                if (point.x - obstacles[lastObstacle].pos_x > dist)
+                    dist = 0;
+                if (obstacles[i].pos_x < -obstacles[i].breadth/2)
                         obstacles[i].isPresent = false;
-                }
+
             }
         }
     }

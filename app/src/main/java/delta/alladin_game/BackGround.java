@@ -17,7 +17,7 @@ public class BackGround {
 
     }
 
-    public void move(Canvas canvas,int top,int speed){
+    public void move(Canvas canvas, int top, float speed){
         canvas.drawBitmap(bitmap,start_x,top,null);
 
         if(start_x<0)

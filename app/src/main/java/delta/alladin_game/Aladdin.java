@@ -9,7 +9,7 @@ import android.graphics.Rect;
 
 class Aladdin {
     private int pos_y;
-    private int length;
+    public int length;
     public Rect dst= new Rect();
     private Rect src = new Rect();
     //Rect src;
@@ -37,7 +37,7 @@ class Aladdin {
         //src = new Rect(0,0,aladdin.getWidth(),aladdin.getHeight());
     }
 
-    public void move(Canvas canvas, int speed,int dir){
+    public void move(Canvas canvas, float speed, float dir){
         pos_y += speed*dir;
 
         dst.top = pos_y - length/2;
