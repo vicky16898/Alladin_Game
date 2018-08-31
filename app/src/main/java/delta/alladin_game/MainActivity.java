@@ -10,7 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity {
-    Game game;
+    public static Game game;
     Point outSize;
     int density;
 
