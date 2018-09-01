@@ -37,8 +37,8 @@ class Aladdin {
         //src = new Rect(0,0,aladdin.getWidth(),aladdin.getHeight());
     }
 
-    public void move(Canvas canvas, float speed, float dir){
-        pos_y += speed*dir;
+    public void move(Canvas canvas, float speed){
+        pos_y += speed;
 
         dst.top = pos_y - length/2;
         dst.bottom = pos_y + length/2;

@@ -22,15 +22,15 @@ import android.widget.Toast;
 
 class Game extends View {
 
-    float density, inc;
+    float density;
+    float inc;
     ObstacleModel obstacleModel;
     BirdModel birdModel;
     long FRAME_RATE = 1000 / 60;
     Aladdin aladdin;
-    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird;
+    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.1, accelerationUp = (float) 0.5;
     Point point;
     BackGround sand, sky;
-    int acceleration = 0;
     boolean flag = false;
     public ViewDialog viewDialog;
     Paint paint;
@@ -41,7 +41,7 @@ class Game extends View {
         super(context);
     }
 
-    public Game(Context context, Point point, int density) {
+    public Game(Context context, Point point, float density) {
         super(context);
         this.context = context;
         this.point = point;
@@ -58,12 +58,7 @@ class Game extends View {
         obstacleModel = new ObstacleModel(point);
         birdModel = new BirdModel(point);
 
-        sand_speed = (point.x / 200) / density;
-        sky_speed = (point.x / 500) / density;
-        speed_aladdin = 0;
-        speed_obstacle = (point.x / 150) / density;
-        speed_bird = (point.x / 100) / density;
-        inc = (float) (point.x / density) / 500000;
+        setSpeed();
     }
 
     @Override
@@ -72,13 +67,15 @@ class Game extends View {
         sky.move(canvas, 0, sky_speed);
 
         sand.move(canvas, point.y / 2, sand_speed);
-        aladdin.move(canvas, speed_aladdin, dir_aladdin);
+        aladdin.move(canvas, speed_aladdin);
+
+            if(dir_aladdin==1)
+                speed_aladdin+=acceleration;
+            else
+                speed_aladdin-=accelerationUp;
+
         obstacleModel.move(canvas, speed_obstacle);
         birdModel.move(canvas, speed_bird);
-        if (acceleration < 25) {
-            acceleration = 0;
-        }
-        acceleration += 2;
 
         for (int i = 0; i < 4; i++) {
             if (obstacleModel.obstacles[i].isPresent)
@@ -99,7 +96,7 @@ class Game extends View {
             }
         }
 
-        if (aladdin.dst.top < -aladdin.length / 2 || aladdin.dst.bottom > point.y + aladdin.length / 2) {
+        if (aladdin.dst.top < 0 || aladdin.dst.bottom > point.y) {
             if (!flag) {
                 viewDialog.showDialog((Activity) getContext());
                 flag = true;
@@ -112,26 +109,30 @@ class Game extends View {
         speed_obstacle += inc;
         speed_bird += inc;
 
-        if (flag == false)
+        if (!flag)
             postInvalidateDelayed(FRAME_RATE);
 
 
     }
 
-
     public void changeDir() {
-        if (dir_aladdin == 1)
-            speed_aladdin = (point.x / 80) / (int) density;
-        else
-            speed_aladdin = (point.x / 80) / (int) density + acceleration;
-
         dir_aladdin *= -1;
     }
 
+    public void setSpeed(){
+        sand_speed = 8*density;
+        sky_speed = 4*density;
+        speed_aladdin = 0*density;
+        speed_obstacle = 8*density;
+        speed_bird = 16*density;
+        acceleration*=density;
+        accelerationUp*=density;
+        inc = (float) 0.01*density;
+    }
 
-    public class ViewDialog {
+    private class ViewDialog {
 
-        public void showDialog(Activity activity) {
+        private void showDialog(Activity activity) {
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
@@ -150,12 +151,7 @@ class Game extends View {
                     obstacleModel = new ObstacleModel(point);
                     birdModel = new BirdModel(point);
 
-                    sand_speed = (point.x / 200) / density;
-                    sky_speed = (point.x / 500) / density;
-                    speed_aladdin = 0;
-                    speed_obstacle = (point.x / 150) / density;
-                    speed_bird = (point.x / 100) / density;
-                    inc = (float) (point.x / density) / 500000;
+                    setSpeed();
                     flag = false;
 
 
@@ -170,4 +166,5 @@ class Game extends View {
 
         }
     }
+
 }
