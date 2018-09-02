@@ -11,9 +11,11 @@ public class BirdModel {
     private Point point;
     public Bird bird;
     private Random random = new Random();
+    Score score;
 
-    BirdModel(Point point){
+    BirdModel(Point point, Score score){
         this.point = point;
+        this.score = score;
         int breadth = point.x / 12;
         int height = point.y / 20;
         bird = new Bird(height, breadth);
@@ -22,10 +24,10 @@ public class BirdModel {
     }
 
     void move(Canvas canvas, float speed){
-        if(x<point.x){
+        if( x < point.x ){
             bird.move(canvas,x,y);
         }
-        if(x<0){
+        if( x+bird.breadth < 0 ){
             x = random.nextInt(point.x * 2) + point.x*2;
             y = random.nextInt(point.y);
         }

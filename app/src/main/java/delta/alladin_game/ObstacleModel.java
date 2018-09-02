@@ -10,10 +10,12 @@ public class ObstacleModel {
     private Random random = new Random();
     public Obstacle[] obstacles;
     private Point point;
+    Score score;
 
-    ObstacleModel(Point point) {
+    ObstacleModel(Point point, Score score) {
         this.point = point;
         obstacles = new Obstacle[4];
+        this.score = score;
 
         for (int i = 0; i < 4; i++)
             obstacles[i] = new Obstacle(point, 0);
@@ -32,7 +34,6 @@ public class ObstacleModel {
     private int findFree() {
         for (int i = 0; i < 4; i++)
             if (!obstacles[i].isPresent) {
-
                 return i;
             }
         return 0;
@@ -48,9 +49,10 @@ public class ObstacleModel {
                 obstacles[i].move(canvas, speed);
                 if (point.x - obstacles[lastObstacle].pos_x > dist)
                     dist = 0;
-                if (obstacles[i].pos_x < -obstacles[i].breadth/2)
-                        obstacles[i].isPresent = false;
-
+                if (obstacles[i].pos_x < -obstacles[i].breadth/2) {
+                    score.update_score(5);
+                    obstacles[i].isPresent = false;
+                }
             }
         }
     }

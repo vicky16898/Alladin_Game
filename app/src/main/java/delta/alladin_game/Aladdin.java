@@ -43,13 +43,15 @@ class Aladdin {
     }
 
     public void move(Canvas canvas, float speed){
-        Log.d("Speed","wat1213123213"+dst.top+"wat"+pos_y+"length/2"+length/2);
-        if(dst.top>=0) pos_y += speed;
-        if(dst.top<=0)pos_y=length/2;
+
+        if(dst.top > 0) pos_y += speed;
+        else pos_y = length/2;
+
         dst.top = pos_y - length/2;
         dst.bottom = pos_y + length/2;
-        Log.d("Speed","wat"+dst.top+"wat"+pos_y+"length/2"+length/2);
+
         canvas.drawBitmap(aladdin,src,dst,null);
+
     }
 
     public boolean fallDown(Canvas canvas, float density){

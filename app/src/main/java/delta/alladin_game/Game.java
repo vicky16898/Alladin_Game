@@ -38,6 +38,7 @@ class Game extends View {
     public ViewDialog viewDialog;
     Paint paint;
     Context context;
+    Score score;
 
 
     public Game(Context context) {
@@ -55,11 +56,12 @@ class Game extends View {
         paint = new Paint();
         paint.setColor(Color.RED);
 
+        this.score = new Score();
         aladdin = new Aladdin(context, point);
         sand = new BackGround(context, R.drawable.sand, point.x * 3, point.y / 2);
         sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
-        obstacleModel = new ObstacleModel(point);
-        birdModel = new BirdModel(point);
+        obstacleModel = new ObstacleModel(point, score);
+        birdModel = new BirdModel(point, score);
 
         setSpeed();
     }
@@ -74,9 +76,7 @@ class Game extends View {
         birdModel.move(canvas, speed_bird);
         aladdin.move(canvas, speed_aladdin);
 
-        Log.d("Speed", aladdin.dst.top+"");
-
-        if(aladdin.dst.top>=0){
+        if(aladdin.dst.top>0){
             if(dir_aladdin==1)
                 speed_aladdin+=acceleration;
             else
@@ -87,12 +87,13 @@ class Game extends View {
         }
 
         if(!intersect){
+
+            score.update_score(0.1);
             for (int i = 0; i < 4; i++) {
                 if (obstacleModel.obstacles[i].isPresent)
                     if (intersects(aladdin.dst, obstacleModel.obstacles[i].dst)) {
                         pausegame();
                         intersect = true;
-
                     }
             }
 
@@ -134,6 +135,7 @@ class Game extends View {
     }
 
     public void setSpeed(){
+        score.score = 0;
         sand_speed = 4*density;
         sky_speed = 3*density;
         speed_aladdin = 0;
@@ -166,7 +168,7 @@ class Game extends View {
             dialog.setCancelable(false);
             dialog.setContentView(R.layout.retry_dialog);
             Window window = dialog.getWindow();
-            Button retry = (Button) dialog.findViewById(R.id.retry);
+            Button retry = dialog.findViewById(R.id.retry);
             retry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -176,8 +178,8 @@ class Game extends View {
                     aladdin = new Aladdin(context, point);
                     sand = new BackGround(context, R.drawable.sand, point.x * 3, point.y / 2);
                     sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
-                    obstacleModel = new ObstacleModel(point);
-                    birdModel = new BirdModel(point);
+                    obstacleModel = new ObstacleModel(point,score);
+                    birdModel = new BirdModel(point,score);
 
                     setSpeed();
                     flag = false;

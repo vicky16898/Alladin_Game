@@ -5,7 +5,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 
 public class Bird {
-    private int breadth,height;
+    int breadth,height;
     private Paint redPaint = new Paint();
     Rect dst = new Rect();
 
