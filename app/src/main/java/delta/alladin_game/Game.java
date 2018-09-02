@@ -8,18 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import static android.graphics.Rect.intersects;
 
@@ -56,7 +50,7 @@ class Game extends View {
         paint = new Paint();
         paint.setColor(Color.RED);
 
-        this.score = new Score();
+        this.score = new Score(point);
         aladdin = new Aladdin(context, point);
         sand = new BackGround(context, R.drawable.sand, point.x * 3, point.y / 2);
         sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
@@ -74,7 +68,7 @@ class Game extends View {
         sand.move(canvas, point.y / 2, sand_speed);
         obstacleModel.move(canvas, speed_obstacle);
         birdModel.move(canvas, speed_bird);
-        aladdin.move(canvas, speed_aladdin);
+
 
 
         if(aladdin.dst.top>=0){
@@ -95,6 +89,7 @@ class Game extends View {
 
         if(!intersect){
 
+            aladdin.move(canvas, speed_aladdin);
             score.update_score(0.1);
             for (int i = 0; i < 4; i++) {
                 if (obstacleModel.obstacles[i].isPresent)
@@ -125,6 +120,8 @@ class Game extends View {
                 }
             }
         }
+
+        score.displayScore(canvas);
 
         sand_speed += inc;
         sky_speed += inc;
@@ -175,6 +172,8 @@ class Game extends View {
             dialog.setCancelable(false);
             dialog.setCanceledOnTouchOutside(false);
             dialog.setContentView(R.layout.retry_dialog);
+            TextView textView = dialog.findViewById(R.id.scoreView);
+            textView.setText("Your score: "+score.getScore());
             Window window = dialog.getWindow();
             Button retry = dialog.findViewById(R.id.retry);
             retry.setOnClickListener(new View.OnClickListener() {
@@ -192,7 +191,6 @@ class Game extends View {
                     setSpeed();
                     flag = false;
 
-
                     dialog.dismiss();
 
                 }
@@ -201,7 +199,6 @@ class Game extends View {
             window.setLayout(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.show();
-
         }
     }
 

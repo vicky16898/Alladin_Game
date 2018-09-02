@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Log;
 
 class Aladdin {
     private int pos_y;
@@ -39,7 +38,6 @@ class Aladdin {
         src.top = aladdin.getHeight()/10;
         src.bottom = aladdin.getHeight()*7/10;
         //
-        //src = new Rect(0,0,aladdin.getWidth(),aladdin.getHeight());
     }
 
     public void move(Canvas canvas, float speed){
@@ -54,14 +52,12 @@ class Aladdin {
 
     public boolean fallDown(Canvas canvas, float density){
         pos_y += downVelocity*density;
-        downVelocity+=0.3*density;
+        downVelocity+=0.5*density;
 
-        Log.d("Speed", breadth+"");
+        dst.top = pos_y - length/2;
+        dst.bottom = pos_y + length/2;
+        canvas.drawBitmap(aladdin,src,dst,null);
 
-        if(dst.top>point.y){
-            return true;
-        }
-        else
-            return false;
+        return dst.top > point.y;
     }
 }

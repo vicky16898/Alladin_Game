@@ -20,7 +20,7 @@ public class BirdModel {
         int height = point.y / 20;
         bird = new Bird(height, breadth);
         x = random.nextInt(point.x * 2) + point.x*2;
-        y =random.nextInt(point.y);
+        y = random.nextInt(point.y/2);
     }
 
     void move(Canvas canvas, float speed){
@@ -29,7 +29,7 @@ public class BirdModel {
         }
         if( x+bird.breadth < 0 ){
             x = random.nextInt(point.x * 2) + point.x*2;
-            y = random.nextInt(point.y);
+            y = random.nextInt(point.y/2);
         }
         x -= speed;
     }
