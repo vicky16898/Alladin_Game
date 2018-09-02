@@ -6,12 +6,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Log;
 
 class Aladdin {
     private int pos_y;
     public int length;
     public Rect dst= new Rect();
     private Rect src = new Rect();
+    float downVelocity = -10;
+    Point point;
+    int breadth;
     //Rect src;
     private Bitmap aladdin;
 
@@ -19,8 +23,9 @@ class Aladdin {
 
         pos_y = point.y/2;
         length = point.y/5;
-        int breadth = point.x / 10;
+        breadth = point.x / 10;
 
+        this.point = point;
         dst.left = point.x/10;
         dst.right = dst.left + breadth;
 
@@ -38,11 +43,25 @@ class Aladdin {
     }
 
     public void move(Canvas canvas, float speed){
-        pos_y += speed;
-
+        Log.d("Speed","wat1213123213"+dst.top+"wat"+pos_y+"length/2"+length/2);
+        if(dst.top>=0) pos_y += speed;
+        if(dst.top<=0)pos_y=length/2;
         dst.top = pos_y - length/2;
         dst.bottom = pos_y + length/2;
-
+        Log.d("Speed","wat"+dst.top+"wat"+pos_y+"length/2"+length/2);
         canvas.drawBitmap(aladdin,src,dst,null);
+    }
+
+    public boolean fallDown(Canvas canvas, float density){
+        pos_y += downVelocity*density;
+        downVelocity+=0.3*density;
+
+        Log.d("Speed", breadth+"");
+
+        if(dst.top>point.y){
+            return true;
+        }
+        else
+            return false;
     }
 }

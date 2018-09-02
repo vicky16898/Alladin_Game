@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -20,6 +21,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static android.graphics.Rect.intersects;
+
 class Game extends View {
 
     float density;
@@ -28,10 +31,10 @@ class Game extends View {
     BirdModel birdModel;
     long FRAME_RATE = 1000 / 60;
     Aladdin aladdin;
-    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.1, accelerationUp = (float) 0.5;
+    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.25, accelerationUp = (float) 0.35;
     Point point;
     BackGround sand, sky;
-    boolean flag = false;
+    boolean flag = false, intersect = false;
     public ViewDialog viewDialog;
     Paint paint;
     Context context;
@@ -67,40 +70,51 @@ class Game extends View {
         sky.move(canvas, 0, sky_speed);
 
         sand.move(canvas, point.y / 2, sand_speed);
+        obstacleModel.move(canvas, speed_obstacle);
+        birdModel.move(canvas, speed_bird);
         aladdin.move(canvas, speed_aladdin);
 
+        Log.d("Speed", aladdin.dst.top+"");
+
+        if(aladdin.dst.top>=0){
             if(dir_aladdin==1)
                 speed_aladdin+=acceleration;
             else
                 speed_aladdin-=accelerationUp;
+        } else {
+            speed_aladdin=0;
+            aladdin.dst.top=0;
+        }
 
-        obstacleModel.move(canvas, speed_obstacle);
-        birdModel.move(canvas, speed_bird);
+        if(!intersect){
+            for (int i = 0; i < 4; i++) {
+                if (obstacleModel.obstacles[i].isPresent)
+                    if (intersects(aladdin.dst, obstacleModel.obstacles[i].dst)) {
+                        pausegame();
+                        intersect = true;
 
-        for (int i = 0; i < 4; i++) {
-            if (obstacleModel.obstacles[i].isPresent)
-                if (aladdin.dst.intersect(obstacleModel.obstacles[i].dst)) {
-
-                    if (!flag) {
-
-                        viewDialog.showDialog((Activity) getContext());
-                        flag = true;
                     }
-                }
-        }
-
-        if (birdModel.bird.dst.intersect(aladdin.dst)) {
-            if (!flag) {
-                viewDialog.showDialog((Activity) getContext());
-                flag = true;
             }
-        }
 
-        if (aladdin.dst.top < 0 || aladdin.dst.bottom > point.y) {
-            if (!flag) {
-                viewDialog.showDialog((Activity) getContext());
-                flag = true;
-                dir_aladdin = 0;
+            if (Rect.intersects(aladdin.dst, birdModel.bird.dst)) {
+                pausegame();
+                intersect = true;
+            }
+
+            if (aladdin.dst.bottom > point.y) {
+                if (!flag) {
+                    viewDialog.showDialog((Activity) getContext());
+                    flag = true;
+                    dir_aladdin = 0;
+                }
+            }
+            }
+        else {
+            if(aladdin.fallDown(canvas, density)){
+                if (!flag) {
+                    viewDialog.showDialog((Activity) getContext());
+                    flag = true;
+                }
             }
         }
 
@@ -120,14 +134,28 @@ class Game extends View {
     }
 
     public void setSpeed(){
-        sand_speed = 8*density;
-        sky_speed = 4*density;
-        speed_aladdin = 0*density;
-        speed_obstacle = 8*density;
-        speed_bird = 16*density;
+        sand_speed = 4*density;
+        sky_speed = 3*density;
+        speed_aladdin = 0;
+        speed_obstacle = 5*density;
+        speed_bird = 9*density;
+        acceleration=(float) 0.1;
+        accelerationUp = (float) 0.1;
         acceleration*=density;
         accelerationUp*=density;
         inc = (float) 0.01*density;
+        intersect = false;
+    }
+
+    public void pausegame(){
+        sand_speed = 0;
+        sky_speed = 0;
+        speed_aladdin = 0;
+        speed_obstacle = 0;
+        speed_bird = 0;
+        acceleration=(float) 0;
+        accelerationUp = (float) 0;
+        inc = 0;
     }
 
     private class ViewDialog {
