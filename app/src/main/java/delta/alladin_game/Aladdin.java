@@ -28,8 +28,8 @@ class Aladdin {
         this.point = point;
         dst.left = point.x/10;
         dst.right = dst.left + breadth;
-
-
+        dst.top = pos_y - length/2;
+        dst.bottom = pos_y + length/2;
 
         aladdin = BitmapFactory.decodeResource(context.getResources(),R.drawable.aladdin);
 
@@ -44,12 +44,10 @@ class Aladdin {
 
     public void move(Canvas canvas, float speed){
 
-        if(dst.top > 0) pos_y += speed;
-        else pos_y = length/2;
-
+        if(pos_y>=length/2) pos_y += speed;
+        if(pos_y<=length/2)pos_y=length/2;
         dst.top = pos_y - length/2;
         dst.bottom = pos_y + length/2;
-
         canvas.drawBitmap(aladdin,src,dst,null);
 
     }

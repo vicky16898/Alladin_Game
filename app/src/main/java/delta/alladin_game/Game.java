@@ -31,7 +31,7 @@ class Game extends View {
     BirdModel birdModel;
     long FRAME_RATE = 1000 / 60;
     Aladdin aladdin;
-    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.25, accelerationUp = (float) 0.35;
+    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.25, accelerationUp = (float) 0.75;
     Point point;
     BackGround sand, sky;
     boolean flag = false, intersect = false;
@@ -76,7 +76,8 @@ class Game extends View {
         birdModel.move(canvas, speed_bird);
         aladdin.move(canvas, speed_aladdin);
 
-        if(aladdin.dst.top>0){
+
+        if(aladdin.dst.top>=0){
             if(dir_aladdin==1)
                 speed_aladdin+=acceleration;
             else
@@ -84,6 +85,12 @@ class Game extends View {
         } else {
             speed_aladdin=0;
             aladdin.dst.top=0;
+        }
+        if (aladdin.dst.top == 0 && dir_aladdin != 1) {
+            speed_aladdin=0;
+        }
+        if (aladdin.dst.top == 0 && dir_aladdin != -1) {
+            speed_aladdin+=acceleration;
         }
 
         if(!intersect){
@@ -141,8 +148,8 @@ class Game extends View {
         speed_aladdin = 0;
         speed_obstacle = 5*density;
         speed_bird = 9*density;
-        acceleration=(float) 0.1;
-        accelerationUp = (float) 0.1;
+        acceleration=(float) 0.25;
+        accelerationUp = (float) 0.75;
         acceleration*=density;
         accelerationUp*=density;
         inc = (float) 0.01*density;
@@ -166,6 +173,7 @@ class Game extends View {
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.setContentView(R.layout.retry_dialog);
             Window window = dialog.getWindow();
             Button retry = dialog.findViewById(R.id.retry);
