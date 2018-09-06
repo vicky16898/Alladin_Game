@@ -15,15 +15,18 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Random;
+
 import static android.graphics.Rect.intersects;
 
 class Game extends View {
 
+    int powerTime=3000,buffer=8500,powerUpState=0;//0-null//1-present//2-obtained
     float density;
     float inc;
     ObstacleModel obstacleModel;
     BirdModel birdModel;
-    long FRAME_RATE = 1000 / 60;
+    long FRAME_RATE = 1000/60;
     Aladdin aladdin;
     float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.25, accelerationUp = (float) 0.75;
     Point point;
@@ -33,6 +36,7 @@ class Game extends View {
     Paint paint;
     Context context;
     Score score;
+    PowerUp powerUp;
 
 
     public Game(Context context) {
@@ -63,9 +67,34 @@ class Game extends View {
     @Override
     public void onDraw(Canvas canvas) {
 
-        sky.move(canvas, 0, sky_speed);
+        buffer-=FRAME_RATE;
+        if(powerUpState==0 && buffer < 0){
+            powerUp = new PowerUp(context,this,point);
+            powerUpState = 1;
+            buffer = 5000;
+        }
 
+        sky.move(canvas, 0, sky_speed);
         sand.move(canvas, point.y / 2, sand_speed);
+
+        if(powerUpState == 1){
+            powerUp.move(canvas);
+            if(powerUp.dst.left<0)
+                powerUpState = 0;
+        }
+        else if(powerUpState==2){
+            powerTime -= FRAME_RATE;
+        }
+        if(powerTime<0) {
+            powerUpState = 0;
+            powerUp.speedUp();
+            buffer =5000;
+            powerTime = 3000;
+        }
+        if(powerUpState==1 && powerUp.dst.intersect(aladdin.dst)) {
+            powerUp.slowDown(density);
+            powerUpState = 2;
+        }
         obstacleModel.move(canvas, speed_obstacle);
         birdModel.move(canvas, speed_bird);
 
@@ -99,10 +128,10 @@ class Game extends View {
                     }
             }
 
-            if (Rect.intersects(aladdin.dst, birdModel.bird.dst)) {
-                pausegame();
-                intersect = true;
-            }
+//            if (Rect.intersects(aladdin.dst, birdModel.bird.dst)) {
+//                pausegame();
+//                intersect = true;
+//            }
 
             if (aladdin.dst.bottom > point.y) {
                 if (!flag) {
@@ -187,6 +216,8 @@ class Game extends View {
                     sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
                     obstacleModel = new ObstacleModel(point,score);
                     birdModel = new BirdModel(point,score);
+                    powerUpState = 0;
+                    buffer = 8500;
 
                     setSpeed();
                     flag = false;
