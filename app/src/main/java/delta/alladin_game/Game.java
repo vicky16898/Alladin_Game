@@ -8,40 +8,42 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import java.util.Random;
+
+import static android.graphics.Rect.intersects;
 
 class Game extends View {
 
-    float density, inc;
+    int powerTime=3000,buffer=8500,powerUpState=0;//0-null//1-present//2-obtained
+    float density;
+    float inc;
     ObstacleModel obstacleModel;
     BirdModel birdModel;
-    long FRAME_RATE = 1000 / 60;
+    long FRAME_RATE = 1000/60;
     Aladdin aladdin;
-    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird;
+    float sand_speed, sky_speed, dir_aladdin = 1, speed_aladdin, speed_obstacle, speed_bird, acceleration=(float) 0.25, accelerationUp = (float) 0.75;
     Point point;
     BackGround sand, sky;
-    int acceleration = 0;
-    boolean flag = false;
+    boolean flag = false, intersect = false;
     public ViewDialog viewDialog;
     Paint paint;
     Context context;
+    Score score;
+    PowerUp powerUp;
 
 
     public Game(Context context) {
         super(context);
     }
 
-    public Game(Context context, Point point, int density) {
+    public Game(Context context, Point point, float density) {
         super(context);
         this.context = context;
         this.point = point;
@@ -52,92 +54,157 @@ class Game extends View {
         paint = new Paint();
         paint.setColor(Color.RED);
 
+        this.score = new Score(point);
         aladdin = new Aladdin(context, point);
         sand = new BackGround(context, R.drawable.sand, point.x * 3, point.y / 2);
         sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
-        obstacleModel = new ObstacleModel(point);
-        birdModel = new BirdModel(point);
+        obstacleModel = new ObstacleModel(point, score);
+        birdModel = new BirdModel(point, score);
 
-        sand_speed = (point.x / 200) / density;
-        sky_speed = (point.x / 500) / density;
-        speed_aladdin = 0;
-        speed_obstacle = (point.x / 150) / density;
-        speed_bird = (point.x / 100) / density;
-        inc = (float) (point.x / density) / 500000;
+        setSpeed();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
 
-        sky.move(canvas, 0, sky_speed);
+        buffer-=FRAME_RATE;
+        if(powerUpState==0 && buffer < 0){
+            powerUp = new PowerUp(context,this,point);
+            powerUpState = 1;
+            buffer = 5000;
+        }
 
+        sky.move(canvas, 0, sky_speed);
         sand.move(canvas, point.y / 2, sand_speed);
-        aladdin.move(canvas, speed_aladdin, dir_aladdin);
+
+        if(powerUpState == 1){
+            powerUp.move(canvas);
+            if(powerUp.dst.left<0)
+                powerUpState = 0;
+        }
+        else if(powerUpState==2){
+            powerTime -= FRAME_RATE;
+        }
+        if(powerTime<0) {
+            powerUpState = 0;
+            powerUp.speedUp();
+            buffer =5000;
+            powerTime = 3000;
+        }
+        if(powerUpState==1 && powerUp.dst.intersect(aladdin.dst)) {
+            powerUp.slowDown(density);
+            powerUpState = 2;
+        }
         obstacleModel.move(canvas, speed_obstacle);
         birdModel.move(canvas, speed_bird);
-        if (acceleration < 25) {
-            acceleration = 0;
+
+
+
+        if(aladdin.dst.top>=0){
+            if(dir_aladdin==1)
+                speed_aladdin+=acceleration;
+            else
+                speed_aladdin-=accelerationUp;
+        } else {
+            speed_aladdin=0;
+            aladdin.dst.top=0;
         }
-        acceleration += 2;
+        if (aladdin.dst.top == 0 && dir_aladdin != 1) {
+            speed_aladdin=0;
+        }
+        if (aladdin.dst.top == 0 && dir_aladdin != -1) {
+            speed_aladdin+=acceleration;
+        }
 
-        for (int i = 0; i < 4; i++) {
-            if (obstacleModel.obstacles[i].isPresent)
-                if (aladdin.dst.intersect(obstacleModel.obstacles[i].dst)) {
+        if(!intersect){
 
-                    if (!flag) {
-
-                        viewDialog.showDialog((Activity) getContext());
-                        flag = true;
+            aladdin.move(canvas, speed_aladdin);
+            score.update_score(0.1);
+            for (int i = 0; i < 4; i++) {
+                if (obstacleModel.obstacles[i].isPresent)
+                    if (intersects(aladdin.dst, obstacleModel.obstacles[i].dst)) {
+                        pausegame();
+                        intersect = true;
                     }
+            }
+
+//            if (Rect.intersects(aladdin.dst, birdModel.bird.dst)) {
+//                pausegame();
+//                intersect = true;
+//            }
+
+            if (aladdin.dst.bottom > point.y) {
+                if (!flag) {
+                    viewDialog.showDialog((Activity) getContext());
+                    flag = true;
+                    dir_aladdin = 0;
                 }
-        }
-
-        if (birdModel.bird.dst.intersect(aladdin.dst)) {
-            if (!flag) {
-                viewDialog.showDialog((Activity) getContext());
-                flag = true;
+            }
+            }
+        else {
+            if(aladdin.fallDown(canvas, density)){
+                if (!flag) {
+                    viewDialog.showDialog((Activity) getContext());
+                    flag = true;
+                }
             }
         }
 
-        if (aladdin.dst.top < -aladdin.length / 2 || aladdin.dst.bottom > point.y + aladdin.length / 2) {
-            if (!flag) {
-                viewDialog.showDialog((Activity) getContext());
-                flag = true;
-                dir_aladdin = 0;
-            }
-        }
+        score.displayScore(canvas);
 
         sand_speed += inc;
         sky_speed += inc;
         speed_obstacle += inc;
         speed_bird += inc;
 
-        if (flag == false)
+        if (!flag)
             postInvalidateDelayed(FRAME_RATE);
 
 
     }
 
-
     public void changeDir() {
-        if (dir_aladdin == 1)
-            speed_aladdin = (point.x / 80) / (int) density;
-        else
-            speed_aladdin = (point.x / 80) / (int) density + acceleration;
-
         dir_aladdin *= -1;
     }
 
+    public void setSpeed(){
+        score.score = 0;
+        sand_speed = 4*density;
+        sky_speed = 3*density;
+        speed_aladdin = 0;
+        speed_obstacle = 5*density;
+        speed_bird = 9*density;
+        acceleration=(float) 0.25;
+        accelerationUp = (float) 0.75;
+        acceleration*=density;
+        accelerationUp*=density;
+        inc = (float) 0.01*density;
+        intersect = false;
+    }
 
-    public class ViewDialog {
+    public void pausegame(){
+        sand_speed = 0;
+        sky_speed = 0;
+        speed_aladdin = 0;
+        speed_obstacle = 0;
+        speed_bird = 0;
+        acceleration=(float) 0;
+        accelerationUp = (float) 0;
+        inc = 0;
+    }
 
-        public void showDialog(Activity activity) {
+    private class ViewDialog {
+
+        private void showDialog(Activity activity) {
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.setContentView(R.layout.retry_dialog);
+            TextView textView = dialog.findViewById(R.id.scoreView);
+            textView.setText("Your score: "+score.getScore());
             Window window = dialog.getWindow();
-            Button retry = (Button) dialog.findViewById(R.id.retry);
+            Button retry = dialog.findViewById(R.id.retry);
             retry.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -147,17 +214,13 @@ class Game extends View {
                     aladdin = new Aladdin(context, point);
                     sand = new BackGround(context, R.drawable.sand, point.x * 3, point.y / 2);
                     sky = new BackGround(context, R.drawable.bg, point.x * 6 / 5, point.y);
-                    obstacleModel = new ObstacleModel(point);
-                    birdModel = new BirdModel(point);
+                    obstacleModel = new ObstacleModel(point,score);
+                    birdModel = new BirdModel(point,score);
+                    powerUpState = 0;
+                    buffer = 8500;
 
-                    sand_speed = (point.x / 200) / density;
-                    sky_speed = (point.x / 500) / density;
-                    speed_aladdin = 0;
-                    speed_obstacle = (point.x / 150) / density;
-                    speed_bird = (point.x / 100) / density;
-                    inc = (float) (point.x / density) / 500000;
+                    setSpeed();
                     flag = false;
-
 
                     dialog.dismiss();
 
@@ -167,7 +230,7 @@ class Game extends View {
             window.setLayout(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.show();
-
         }
     }
+
 }

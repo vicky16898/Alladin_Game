@@ -12,6 +12,9 @@ class Aladdin {
     public int length;
     public Rect dst= new Rect();
     private Rect src = new Rect();
+    float downVelocity = -10;
+    Point point;
+    int breadth;
     //Rect src;
     private Bitmap aladdin;
 
@@ -19,12 +22,13 @@ class Aladdin {
 
         pos_y = point.y/2;
         length = point.y/5;
-        int breadth = point.x / 10;
+        breadth = point.x / 10;
 
+        this.point = point;
         dst.left = point.x/10;
         dst.right = dst.left + breadth;
-
-
+        dst.top = pos_y - length/2;
+        dst.bottom = pos_y + length/2;
 
         aladdin = BitmapFactory.decodeResource(context.getResources(),R.drawable.aladdin);
 
@@ -34,15 +38,26 @@ class Aladdin {
         src.top = aladdin.getHeight()/10;
         src.bottom = aladdin.getHeight()*7/10;
         //
-        //src = new Rect(0,0,aladdin.getWidth(),aladdin.getHeight());
     }
 
-    public void move(Canvas canvas, float speed, float dir){
-        pos_y += speed*dir;
+    public void move(Canvas canvas, float speed){
+
+        if(pos_y>=length/2) pos_y += speed;
+        if(pos_y<=length/2)pos_y=length/2;
+        dst.top = pos_y - length/2;
+        dst.bottom = pos_y + length/2;
+        canvas.drawBitmap(aladdin,src,dst,null);
+
+    }
+
+    public boolean fallDown(Canvas canvas, float density){
+        pos_y += downVelocity*density;
+        downVelocity+=0.5*density;
 
         dst.top = pos_y - length/2;
         dst.bottom = pos_y + length/2;
-
         canvas.drawBitmap(aladdin,src,dst,null);
+
+        return dst.top > point.y;
     }
 }
